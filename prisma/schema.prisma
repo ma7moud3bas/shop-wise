@@ -1,0 +1,199 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int           @id
+  password_hash String
+  first_name    String
+  last_name     String?
+  email         String
+  created_at    DateTime      @default(now())
+  updated_at    DateTime      @updatedAt
+  UserAddresses UserAddress[]
+  UserPayments  UserPayment[]
+  Carts         Cart[]
+  Orders        Order[]
+
+  @@map(name: "users")
+}
+
+model AdminType {
+  id         Int         @id
+  created_at DateTime    @default(now())
+  updated_at DateTime    @updatedAt
+  AdminUsers AdminUser[]
+
+  @@map(name: "admin_types")
+}
+
+model AdminUser {
+  id            Int       @id
+  password_hash String
+  first_name    String
+  last_name     String?
+  admin_type    AdminType @relation(fields: [type_id], references: [id])
+  type_id       Int
+  email         String
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  @@map(name: "admin_users")
+}
+
+model UserAddress {
+  id            Int      @id
+  user          User     @relation(fields: [user_id], references: [id])
+  user_id       Int
+  address_line1 String
+  address_line2 String?
+  city          String
+  postal_code   String
+  country       String
+  telephone     String?
+  mobile        String
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  @@map(name: "user_addresses")
+}
+
+model UserPayment {
+  id         Int      @id
+  user       User     @relation(fields: [user_id], references: [id])
+  user_id    Int
+  account_no Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map(name: "user_payments")
+}
+
+model Product {
+  id           Int              @id
+  name         String
+  description  String
+  SKU          String
+  category     ProductCartegory @relation(fields: [cartegory_id], references: [id])
+  cartegory_id Int
+  inventory    ProductInventory @relation(fields: [inventory_id], references: [id])
+  inventory_id Int
+  price        Float
+  discount_id  Int?
+  discount     Discount?        @relation(fields: [discount_id], references: [id])
+  created_at   DateTime         @default(now())
+  updated_at   DateTime         @updatedAt
+  CartItems    CartItem[]
+  OrderItems   OrderItem[]
+
+  @@index([SKU], name: "SKU_index", type: Hash)
+  @@index([name], name: "name_index", type: BTree)
+  @@index([price], name: "price_index", type: BTree)
+  @@map(name: "products")
+}
+
+model ProductCartegory {
+  id          Int       @id
+  name        String
+  description String
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  Products    Product[]
+
+  @@index([name], name: "category_index", type: Hash)
+  @@map(name: "product_cartegories")
+}
+
+model ProductInventory {
+  id         Int       @id
+  quantity   Int
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  Products   Product[]
+
+  @@map(name: "product_inventories")
+}
+
+model Discount {
+  id                  Int       @id
+  name                String
+  description         String
+  discount_percentage Float
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  Products            Product[]
+
+  @@map(name: "discounts")
+}
+
+model Cart {
+  id         Int        @id
+  user       User?      @relation(fields: [user_id], references: [id])
+  user_id    Int?
+  total      Float
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  CartItems  CartItem[]
+
+  @@map(name: "carts")
+}
+
+model CartItem {
+  id         Int      @id
+  cart       Cart     @relation(fields: [cart_id], references: [id])
+  cart_id    Int
+  product    Product  @relation(fields: [product_id], references: [id])
+  product_id Int
+  quantity   Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map(name: "cart_items")
+}
+
+model Order {
+  id         Int         @id
+  user       User        @relation(fields: [user_id], references: [id])
+  user_id    Int
+  total      Int
+  payment    Payment     @relation(fields: [payment_id], references: [id])
+  payment_id Int         @unique
+  created_at DateTime    @default(now())
+  updated_at DateTime    @updatedAt
+  OrderItems OrderItem[]
+
+  @@index([user_id], name: "order_user_index", type: Hash)
+  @@map(name: "orders")
+}
+
+model OrderItem {
+  id         Int      @id
+  order      Order    @relation(fields: [order_id], references: [id])
+  order_id   Int
+  product    Product  @relation(fields: [product_id], references: [id])
+  product_id Int
+  quantity   Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map(name: "order_items")
+}
+
+model Payment {
+  id         Int      @id
+  order      Order?
+  amount     Float
+  provider   String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map(name: "payments")
+}
