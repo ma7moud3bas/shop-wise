@@ -1,22 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { UserService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserInfoDto } from './dto/update-user-info.dto';
-import { ApiOkResponse, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiCreatedResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { UpdateUserPasswordDto } from './dto/update-user-password.dto';
 import { UpdateUserEmailDto } from './dto/update-user-email.dto';
 import { UserEntity } from './entities/user.entity';
+import { JwtAuthGuard } from '../auth/guards/auth.guard';
+import { Public } from '../lib/decorators/public-endpoint.decorator';
 
 @Controller('users')
 @ApiTags('Users')
 export class UserController {
   constructor(private readonly userService: UserService) { }
-
-  @Post()
-  @ApiCreatedResponse({ description: 'The user has been successfully created.', type: UserEntity })
-  async createUser(@Body() createUserDto: CreateUserDto) {
-    return new UserEntity(await this.userService.createUser(createUserDto));
-  }
 
   @Get()
   @ApiOkResponse({ type: [UserEntity] })
@@ -26,15 +21,18 @@ export class UserController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
   @ApiOkResponse({ type: UserEntity })
   async getUser(@Param('id', ParseIntPipe) id: number) {
     return new UserEntity(await this.userService.getUser({ id }));
   }
+
   @ApiOkResponse({ type: UserEntity })
   @Patch('update_info/:id')
   async updateUserInfo(@Param('id', ParseIntPipe) id: number, @Body() updateUserInfoDto: UpdateUserInfoDto) {
     return new UserEntity(await this.userService.updateUserInfo(id, updateUserInfoDto));
   }
+
   @ApiOkResponse({ type: UserEntity })
   @Patch('update_password/:id')
   async updateUserPassword(@Param('id', ParseIntPipe) id: number, @Body() updateUserPasswordDto: UpdateUserPasswordDto) {

@@ -11,42 +11,20 @@ datasource db {
 }
 
 model User {
-  id            Int           @id @default(autoincrement())
+  id            Int            @id @default(autoincrement())
   password_hash String
   first_name    String
   last_name     String?
-  email         String        @unique
-  created_at    DateTime      @default(now())
-  updated_at    DateTime      @updatedAt
+  email         String         @unique
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+  role          user_role_enum @default(USER)
   UserAddresses UserAddress[]
   UserPayments  UserPayment[]
   Carts         Cart[]
   Orders        Order[]
 
   @@map(name: "users")
-}
-
-model AdminType {
-  id         Int         @id @default(autoincrement())
-  created_at DateTime    @default(now())
-  updated_at DateTime    @updatedAt
-  AdminUsers AdminUser[]
-
-  @@map(name: "admin_types")
-}
-
-model AdminUser {
-  id            Int       @id @default(autoincrement())
-  password_hash String
-  first_name    String
-  last_name     String?
-  admin_type    AdminType @relation(fields: [type_id], references: [id])
-  type_id       Int
-  email         String    @unique
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @updatedAt
-
-  @@map(name: "admin_users")
 }
 
 model UserAddress {
@@ -196,4 +174,11 @@ model Payment {
   updated_at DateTime @updatedAt
 
   @@map(name: "payments")
+}
+
+enum user_role_enum {
+  SUPER_ADMIN
+  ADMIN
+  MODERATOR
+  USER
 }

@@ -3,9 +3,9 @@ import { AppModule } from './app.module';
 import { PrismaService } from './prisma/prisma.service';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-import { PrismaClientExceptionFilter } from '../lib/filters/prisma-client-exception.filter';
-import { TransformResponseInterceptor } from '../lib/interceptors/transform-response.interceptor';
-import { HttpExceptionFilter } from '../lib/filters/https-exception.filter';
+import { PrismaClientExceptionFilter } from './lib/filters/prisma-client-exception.filter';
+import { TransformResponseInterceptor } from './lib/interceptors/transform-response.interceptor';
+import { HttpExceptionFilter } from './lib/filters/https-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,6 +15,7 @@ async function bootstrap() {
     .setTitle('SwiftShop API')
     .setDescription('The SwiftShop API description')
     .setVersion('0.1')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
