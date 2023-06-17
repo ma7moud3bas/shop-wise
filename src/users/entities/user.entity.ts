@@ -1,6 +1,7 @@
 import { User } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
+import { Role } from 'src/lib/enums/user-roles.enum';
 
 export class UserEntity implements User {
     @ApiProperty({ example: 1 })
@@ -23,6 +24,8 @@ export class UserEntity implements User {
 
     @ApiProperty()
     updated_at: Date;
+    @Exclude()
+    role: Role;
 
     constructor(partial: Partial<UserEntity>) {
         Object.assign(this, partial);

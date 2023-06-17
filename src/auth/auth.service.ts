@@ -27,7 +27,9 @@ export class AuthService {
         };
     }
 
-    validateUser(userId: string) {
+
+    validateUserSession(userId: string) {
         return this.userService.getUser({ id: Number(userId) });
     }
+
 }

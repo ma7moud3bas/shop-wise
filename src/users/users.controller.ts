@@ -5,8 +5,8 @@ import { ApiOkResponse, ApiCreatedResponse, ApiTags, ApiBearerAuth } from '@nest
 import { UpdateUserPasswordDto } from './dto/update-user-password.dto';
 import { UpdateUserEmailDto } from './dto/update-user-email.dto';
 import { UserEntity } from './entities/user.entity';
-import { JwtAuthGuard } from '../auth/guards/auth.guard';
 import { Public } from '../lib/decorators/public-endpoint.decorator';
+import { Roles } from '../lib/decorators/user-roles.decorator';
 
 @Controller('users')
 @ApiTags('Users')
@@ -23,6 +23,7 @@ export class UserController {
   @Get(':id')
   @ApiBearerAuth()
   @ApiOkResponse({ type: UserEntity })
+  @Roles(['ADMIN', 'USER'])
   async getUser(@Param('id', ParseIntPipe) id: number) {
     return new UserEntity(await this.userService.getUser({ id }));
   }
