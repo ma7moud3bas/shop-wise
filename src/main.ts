@@ -6,6 +6,7 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { PrismaClientExceptionFilter } from './lib/filters/prisma-client-exception.filter';
 import { TransformResponseInterceptor } from './lib/interceptors/transform-response.interceptor';
 import { HttpExceptionFilter } from './lib/filters/https-exception.filter';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -29,7 +30,11 @@ async function bootstrap() {
 
   const { httpAdapter } = app.get(HttpAdapterHost);
   app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter), new HttpExceptionFilter());
-
+  app.enableCors({
+    credentials: true,
+    origin: process.env.FRONTEND_URL,
+  })
+  app.use(cookieParser())
   await app.listen(3000);
 }
 bootstrap();

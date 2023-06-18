@@ -10,7 +10,10 @@ import { UserService } from '../../users/users.service';
 import { Role } from '../enums/user-roles.enum';
 import { ROLES_KEY } from '../decorators/user-roles.decorator';
 import { Reflector } from '@nestjs/core';
-import { AuthPrivateKey } from '../contstants';
+import { AuthPrivateKey } from '../constants';
+import { IS_PUBLIC_KEY } from '../decorators/public-endpoint.decorator';
+
+// this guard is used to handle authentication and authorization
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -22,7 +25,17 @@ export class AuthGuard implements CanActivate {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
+
+        // check route is public
+        const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+
+        if (isPublic) return true;
+
         const token = this.extractTokenFromHeader(request);
+
         // check if token exists
         if (!token) {
             throw new UnauthorizedException();

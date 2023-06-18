@@ -7,6 +7,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserService } from '../users/users.service';
+import { AuthPrivateKey } from '../lib/constants';
 @Injectable()
 export class AuthService {
     constructor(private userService: UserService, private jwtService: JwtService) { }
@@ -21,12 +22,14 @@ export class AuthService {
         if (!isPasswordValid) {
             throw new UnauthorizedException('Invalid password');
         }
-
-        return {
-            accessToken: this.jwtService.sign({ userId: user.id }),
-        };
+        const token = this.signToken(user.id);
+        return { accessToken: token };
     }
 
+
+    signToken(userId: number) {
+        return this.jwtService.sign({ userId }, { secret: AuthPrivateKey });
+    }
 
     validateUserSession(userId: string) {
         return this.userService.getUser({ id: Number(userId) });

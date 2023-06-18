@@ -24,6 +24,7 @@ export class UserEntity implements User {
 
     @ApiProperty()
     updated_at: Date;
+
     @Exclude()
     role: Role;
 
